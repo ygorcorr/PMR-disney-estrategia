@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Estratégia Disney — Guia Prático PMR</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C96A;
+    --bg: #0A0A0F;
+    --bg-card: #111118;
+    --bg-card2: #16161F;
+    --text: #F0EDE6;
+    --text-dim: #8A8499;
+    --creative: #7B3FA0;
+    --critic: #B05A1A;
+    --realist: #1A5FA0;
+    --action: #2E7D50;
+    --future: #8B1A1A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    background: linear-gradient(180deg, #000 0%, #0A0A0F 100%);
+    padding: 36px 20px 28px;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,168,76,0.25);
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 80px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .header-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 5vw, 40px);
+    font-weight: 900;
+    color: var(--gold-light);
+    line-height: 1.15;
+    letter-spacing: 1px;
+    text-shadow: 0 0 40px rgba(201,168,76,0.3);
+  }
+  .header h1 span { color: var(--text); }
+  .header p {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    background: #0D0D14;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    scrollbar-width: none;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: none;
+    padding: 13px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* SPACES OVERVIEW */
+  .spaces-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    padding: 20px 16px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .space-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .space-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--space-color);
+    border-radius: 16px 16px 0 0;
+  }
+  .space-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .space-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    background: rgba(255,255,255,0.05);
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .space-badge { display: flex; flex-direction: column; }
+  .space-num {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .space-name {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--space-color);
+  }
+  .space-question {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    font-style: italic;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border-left: 2px solid var(--space-color);
+  }
+  .space-question strong {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--space-color);
+    margin-bottom: 4px;
+    font-style: normal;
+  }
+  .space-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .space-tag {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    padding: 4px 9px;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  /* STEPS */
+  .steps-intro {
+    padding: 20px 16px 10px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .steps-intro p {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    background: rgba(201,168,76,0.07);
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .steps-intro p strong { color: var(--gold); }
+
+  .step-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    margin: 12px 16px;
+    max-width: 648px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg-card2);
+  }
+  .step-num {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold) 0%, #8A6020 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: #000;
+    flex-shrink: 0;
+  }
+  .step-title-block { flex: 1; }
+  .step-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .step-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .step-chevron {
+    font-size: 18px;
+    color: var(--text-dim);
+    transition: transform 0.25s;
+  }
+  .step-card.open .step-chevron { transform: rotate(180deg); }
+
+  .step-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .step-card.open .step-body { display: block; }
+
+  .step-emoji-row {
+    display: flex;
+    gap: 10px;
+    margin: 16px 0 14px;
+    flex-wrap: wrap;
+  }
+  .step-emoji-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    flex: 1;
+    min-width: 110px;
+  }
+  .step-emoji-item .em { font-size: 20px; }
+
+  .step-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+  .step-desc strong { color: var(--text); }
+
+  .tip-box {
+    background: rgba(201,168,76,0.07);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+  .tip-box .tip-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+
+  .script-box {
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    font-style: italic;
+  }
+  .script-box .script-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 6px;
+    font-style: normal;
+  }
+
+  /* CONCEPT BOX */
+  .concept-box {
+    display: flex;
+    gap: 10px;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+  .concept-item {
+    flex: 1;
+    min-width: 130px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .concept-item .ci-icon { font-size: 26px; margin-bottom: 8px; }
+  .concept-item .ci-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .concept-item .ci-desc { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+
+  /* FLOW MAP */
+  .flow-map {
+    padding: 16px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .flow-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .flow-line-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 40px;
+  }
+  .flow-dot {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--bg-card2);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .flow-connector {
+    width: 2px;
+    flex: 1;
+    min-height: 24px;
+    background: linear-gradient(180deg, var(--gold), rgba(201,168,76,0.1));
+    margin: 4px 0;
+  }
+  .flow-content { flex: 1; padding-bottom: 20px; }
+  .flow-content h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    margin-top: 8px;
+  }
+  .flow-content p {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .flow-content .fc-tag {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,168,76,0.1);
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-bottom: 5px;
+  }
+
+  /* ROOMS VISUAL */
+  .rooms-visual {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .room {
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.07);
+    position: relative;
+  }
+  .room.lit {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+  .room .r-icon { font-size: 22px; margin-bottom: 6px; }
+  .room .r-label { font-size: 10px; color: var(--text-dim); line-height: 1.3; }
+  .room.lit .r-label { color: var(--gold); }
+  .room .r-bulb {
+    position: absolute;
+    top: 6px; right: 6px;
+    font-size: 10px;
+  }
+
+  .bottom-hint {
+    text-align: center;
+    padding: 30px 16px;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  @media (min-width: 600px) {
+    .spaces-grid { grid-template-columns: repeat(2, 1fr); }
+    .step-card { margin: 12px 0; }
+  }
+  @media (max-width: 380px) {
+    .rooms-visual { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">PMR · Marcos · PNL</div>
+  <h1><span>Estratégia</span> Disney<br><span>da</span> Criatividade</h1>
+  <p>Criatividade · Crítico · Como · Ação · Futuro</p>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-panel="p1">🏠 Os Espaços</div>
+  <div class="tab" data-panel="p2">📋 Passo a Passo</div>
+  <div class="tab" data-panel="p3">🧠 Como Funciona</div>
+  <div class="tab" data-panel="p4">🔄 Fluxo Completo</div>
+</div>
+
+<!-- PANEL 1: SPACES -->
+<div class="panel active" id="p1">
+  <div class="spaces-grid">
+
+    <div class="space-card" style="--space-color: var(--creative)">
+      <div class="space-header">
+        <div class="space-icon">💡</div>
+        <div class="space-badge">
+          <span class="space-num">Espaço 1</span>
+          <span class="space-name">Criatividade</span>
+        </div>
+      </div>
+      <div class="space-question"><strong>Pergunta do espaço</strong>"O que eu poderia fazer para atingir meu objetivo?"</div>
+      <div class="space-tags">
+        <span class="space-tag">Sem julgamento</span>
+        <span class="space-tag">Tudo é possível</span>
+        <span class="space-tag">Mundo da lua</span>
+        <span class="space-tag">Mínimo 5 ideias</span>
+      </div>
+    </div>
+
+    <div class="space-card" style="--space-color: var(--critic)">
+      <div class="space-header">
+        <div class="space-icon">🔍</div>
+        <div class="space-badge">
+          <span class="space-num">Espaço 2</span>
+          <span class="space-name">O Crítico</span>
+        </div>
+      </div>
+      <div class="space-question"><strong>Pergunta do espaço</strong>"O que precisa ser ajustado para isso funcionar?"</div>
+      <div class="space-tags">
+        <span class="space-tag">Analisa as ideias</span>
+        <span class="space-tag">Protege você</span>
+        <span class="space-tag">Filtra o que não serve</span>
+        <span class="space-tag">Sem excesso!</span>
+      </div>
+    </div>
+
+    <div class="space-card" style="--space-color: var(--realist)">
+      <div class="space-header">
+        <div class="space-icon">🗺️</div>
+        <div class="space-badge">
+          <span class="space-num">Espaço 3</span>
+          <span class="space-name">O Como</span>
+        </div>
+      </div>
+      <div class="space-question"><strong>Pergunta do espaço</strong>"Como vou colocar isso em prática? Quando começo?"</div>
+      <div class="space-tags">
+        <span class="space-tag">Plano concreto</span>
+        <span class="space-tag">Datas e ações</span>
+        <span class="space-tag">O que é possível agora</span>
+      </div>
+    </div>
+
+    <div class="space-card" style="--space-color: var(--action)">
+      <div class="space-header">
+        <div class="space-icon">📝</div>
+        <div class="space-badge">
+          <span class="space-num">Pausa</span>
+          <span class="space-name">Plano de Ação</span>
+        </div>
+      </div>
+      <div class="space-question"><strong>O que fazer aqui</strong>"Anota pelo menos 3 ações concretas que vai executar"</div>
+      <div class="space-tags">
+        <span class="space-tag">Papel e caneta</span>
+        <span class="space-tag">Mínimo 3 tarefas</span>
+        <span class="space-tag">Com prazo real</span>
+      </div>
+    </div>
+
+    <div class="space-card" style="--space-color: var(--future)">
+      <div class="space-header">
+        <div class="space-icon">🎬</div>
+        <div class="space-badge">
+          <span class="space-num">Espaço 4</span>
+          <span class="space-name">Ponte ao Futuro</span>
+        </div>
+      </div>
+      <div class="space-question"><strong>Pergunta do espaço</strong>"Como estou me sentindo depois de ter realizado tudo isso?"</div>
+      <div class="space-tags">
+        <span class="space-tag">Visualização</span>
+        <span class="space-tag">Filme do futuro</span>
+        <span class="space-tag">Trilha neural instalada</span>
+      </div>
+    </div>
+
+  </div>
+  <div class="bottom-hint">As respostas já estão dentro de você — PNL só acende a luz</div>
+</div>
+
+<!-- PANEL 2: STEPS -->
+<div class="panel" id="p2">
+  <div style="max-width:680px;margin:0 auto;padding:0 16px;">
+
+  <div class="steps-intro">
+    <p>A <strong>Estratégia Disney</strong> usa 3 espaços físicos diferentes para separar os papéis de <strong>Criador, Crítico e Realizador</strong>. Faça em dupla: um guia, um participante. Cada pessoa leva ~10-12 min.</p>
+  </div>
+
+  <!-- STEP 0 -->
+  <div class="step-card open" id="s0">
+    <div class="step-header" onclick="toggleStep('s0')">
+      <div class="step-num">0</div>
+      <div class="step-title-block">
+        <div class="step-label">Preparação</div>
+        <div class="step-title">Defina o Objetivo e os Espaços</div>
+      </div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <div class="step-emoji-row">
+        <div class="step-emoji-item"><span class="em">🎯</span> Objetivo claro</div>
+        <div class="step-emoji-item"><span class="em">💡</span> Espaço 1</div>
+        <div class="step-emoji-item"><span class="em">🔍</span> Espaço 2</div>
+        <div class="step-emoji-item"><span class="em">🗺️</span> Espaço 3</div>
+      </div>
+      <p class="step-desc">Antes de começar, defina dois elementos essenciais: <strong>qual é o objetivo</strong> da pessoa (riqueza, relacionamento, comunicação...) e <strong>quais são os 3 espaços físicos</strong> — três locais distintos onde cada papel vai acontecer.</p>
+      <div class="tip-box">
+        <div class="tip-label">🎯 Temas possíveis</div>
+        <strong>Riqueza:</strong> mentorias, investimentos, negócios, treinamentos...<br>
+        <strong>Relacionamento:</strong> comunicar melhor, resolver conflitos, se conectar...<br><br>
+        Pode ser qualquer objetivo — o importante é ser específico.
+      </div>
+      <div class="tip-box" style="margin-top:10px;">
+        <div class="tip-label">📍 Os espaços</div>
+        Podem ser lugares do hotel, da sala, cadeiras diferentes... O que importa é que sejam <strong>fisicamente separados</strong> um do outro.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-card" id="s1">
+    <div class="step-header" onclick="toggleStep('s1')">
+      <div class="step-num">1</div>
+      <div class="step-title-block">
+        <div class="step-label">Espaço 1</div>
+        <div class="step-title">Entre na Criatividade — sem julgamento!</div>
+      </div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <div class="step-emoji-row">
+        <div class="step-emoji-item"><span class="em">💡</span> Espaço 1</div>
+        <div class="step-emoji-item"><span class="em">🌈</span> Tudo pode</div>
+        <div class="step-emoji-item"><span class="em">👍</span> Sinal com 5+</div>
+      </div>
+      <p class="step-desc">O participante entra no <strong>Espaço 1</strong>. Aqui é o <strong>mundo da lua</strong> — não existe ideia ruim, não existe impossível. Nenhum julgamento. O cérebro só cria.</p>
+      <div class="script-box">
+        <div class="script-label">💬 Script do guia</div>
+        "Você está no espaço da criatividade. Aqui tudo é possível, sem julgamento nenhum. Pensa no seu objetivo: [objetivo]. Que ideias surgem? Deixa vir... Quando você tiver mais de 5 ideias, me dá um sinal com a cabeça."
+      </div>
+      <div class="tip-box">
+        <div class="tip-label">⏳ Paciência</div>
+        Não fale "não tá vindo nada" — vai vir. Somos seres criacionais por natureza. Faz parte do nosso DNA criar. Aguarda o sinal.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-card" id="s2">
+    <div class="step-header" onclick="toggleStep('s2')">
+      <div class="step-num">2</div>
+      <div class="step-title-block">
+        <div class="step-label">Espaço 2</div>
+        <div class="step-title">Entre no Crítico — ele protege, não paralisa</div>
+      </div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <div class="step-emoji-row">
+        <div class="step-emoji-item"><span class="em">🔍</span> Analisa</div>
+        <div class="step-emoji-item"><span class="em">🛡️</span> Protege</div>
+        <div class="step-emoji-item"><span class="em">⚖️</span> Filtra</div>
+      </div>
+      <p class="step-desc">Muda para o <strong>Espaço 2</strong>. Agora o participante olha para as ideias que vieram e analisa: o que realmente pode funcionar? O que precisa ser ajustado?</p>
+      <div class="script-box">
+        <div class="script-label">💬 Script do guia</div>
+        "Agora você está no espaço do crítico. Olha para as ideias que vieram. O que precisa ser verificado? O que faz sentido pra você? O que pode precisar de ajuste?"
+      </div>
+      <div class="tip-box">
+        <div class="tip-label">⚠️ Cuidado com o excesso</div>
+        O crítico é necessário — ele protege você. Mas em excesso ele paralisa: passa a rejeitar tudo que é novo e só aceitar o que já existe. O segredo é <strong>usar sem exagerar</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-card" id="s3">
+    <div class="step-header" onclick="toggleStep('s3')">
+      <div class="step-num">3</div>
+      <div class="step-title-block">
+        <div class="step-label">Espaço 3</div>
+        <div class="step-title">Entre no Como — transforma em plano real</div>
+      </div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <div class="step-emoji-row">
+        <div class="step-emoji-item"><span class="em">🗺️</span> Como?</div>
+        <div class="step-emoji-item"><span class="em">📅</span> Quando?</div>
+        <div class="step-emoji-item"><span class="em">🚀</span> Por onde?</div>
+      </div>
+      <p class="step-desc">Muda para o <strong>Espaço 3</strong>. Aqui é a junção — pega o que sobrou do crítico e transforma em ação concreta. Não é mais "e se", é <strong>"como e quando"</strong>.</p>
+      <div class="script-box">
+        <div class="script-label">💬 Script do guia</div>
+        "Agora você está no espaço do Como. Como você vai colocar essas ideias em prática? Quando você começa? Por onde você começa? O que você faz primeiro?"
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-card" id="s4">
+    <div class="step-header" onclick="toggleStep('s4')">
+      <div class="step-num">4</div>
+      <div class="step-title-block">
+        <div class="step-label">Pausa — Plano de Ação</div>
+        <div class="step-title">Anota 3 ações concretas agora</div>
+      </div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <div class="step-emoji-row">
+        <div class="step-emoji-item"><span class="em">📝</span> Papel e caneta</div>
+        <div class="step-emoji-item"><span class="em">3️⃣</span> Mínimo 3</div>
+        <div class="step-emoji-item"><span class="em">📅</span> Com prazo</div>
+      </div>
+      <p class="step-desc">Antes de ir para o último espaço, <strong>para tudo e anota</strong>. Essa é a ponte entre o sonho e a realidade. Sem anotar, a ideia some.</p>
+      <div class="tip-box">
+        <div class="tip-label">📝 O que anotar</div>
+        Pelo menos <strong>3 tarefas específicas</strong> com data ou prazo. Não "vou estudar mais" — mas "vou pesquisar 3 cursos de investimento essa semana" ou "vou ligar para um mentor na quinta-feira".
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-card" id="s5">
+    <div class="step-header" onclick="toggleStep('s5')">
+      <div class="step-num">5</div>
+      <div class="step-title-block">
+        <div class="step-label">Espaço 4 — Finalização</div>
+        <div class="step-title">Ponte ao Futuro — assiste o filme acontecendo</div>
+      </div>
+      <div class="step-chevron">▾</div>
+    </div>
+    <div class="step-body">
+      <div class="step-emoji-row">
+        <div class="step-emoji-item"><span class="em">🎬</span> Tela mental</div>
+        <div class="step-emoji-item"><span class="em">🔮</span> Já aconteceu</div>
+        <div class="step-emoji-item"><span class="em">😊</span> Celebração</div>
+      </div>
+      <p class="step-desc">O momento mais poderoso da técnica. O participante fecha os olhos e <strong>assiste o objetivo já realizado</strong> — como um filme do futuro. A mente vive aquilo como real e instala a trilha neural do sucesso.</p>
+      <div class="script-box">
+        <div class="script-label">💬 Script completo</div>
+        "Fecha os olhos, respira fundo... mais uma vez... imagina agora na sua frente uma tela de cinema. E tudo que você escreveu que ia fazer, você vai assistir num filme você fazendo. Você vai assistir você fazendo, concluindo, acontecendo. Lembra do seu objetivo? Assista no filme agora... acontecendo. Tudo que você escreveu, tudo que você tem no coração de objetivo, tá passando no filme agora. Nesse filme, você já tá até contando pra alguém como foi, como aconteceu... tá feliz demais. Como tá aí? É isso mesmo que você quer? Parabéns."
+      </div>
+      <div class="tip-box">
+        <div class="tip-label">🧠 Por que funciona</div>
+        A mente não diferencia imaginação de realidade. Ao vivenciar o objetivo como já realizado, o cérebro cria a trilha neural do comportamento vencedor — antes mesmo de você agir.
+      </div>
+    </div>
+  </div>
+
+  </div>
+  <div class="bottom-hint">Faça com alguém muito top — a atividade merece</div>
+</div>
+
+<!-- PANEL 3: HOW IT WORKS -->
+<div class="panel" id="p3">
+  <div style="max-width:680px;margin:0 auto;padding:20px 16px;">
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:10px;">A metáfora da casa</div>
+      <p style="font-size:14px;line-height:1.7;color:var(--text-dim);margin-bottom:14px;">A PNL não te ensina nada novo. Imagina uma casa com vários cômodos — <strong style="color:var(--text)">só um tem a luz acesa</strong>. O restante está no escuro. A PNL acende a luz dos outros cômodos que você já tem dentro de você.</p>
+    </div>
+
+    <div class="rooms-visual">
+      <div class="room lit">
+        <div class="r-bulb">💡</div>
+        <div class="r-icon">🧠</div>
+        <div class="r-label">O que você já usa</div>
+      </div>
+      <div class="room">
+        <div class="r-icon">🎨</div>
+        <div class="r-label">Criatividade</div>
+      </div>
+      <div class="room">
+        <div class="r-icon">🎤</div>
+        <div class="r-label">Oratória</div>
+      </div>
+      <div class="room">
+        <div class="r-icon">💼</div>
+        <div class="r-label">Liderança</div>
+      </div>
+      <div class="room">
+        <div class="r-icon">❤️</div>
+        <div class="r-label">Relacionamento</div>
+      </div>
+      <div class="room">
+        <div class="r-icon">💰</div>
+        <div class="r-label">Riqueza</div>
+      </div>
+    </div>
+
+    <p style="font-size:13px;color:var(--text-dim);line-height:1.6;text-align:center;margin:12px 0 24px;font-style:italic;">"Caraca, tinha isso aqui dentro de mim e eu não sabia!" — é exatamente isso que a PNL revela.</p>
+
+    <div style="background:var(--bg-card);border-radius:14px;padding:18px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;">Por que 3 espaços físicos?</div>
+      <div class="concept-box">
+        <div class="concept-item">
+          <div class="ci-icon">🧠</div>
+          <div class="ci-title">Âncora espacial</div>
+          <div class="ci-desc">O corpo aprende que cada lugar tem um estado mental diferente</div>
+        </div>
+        <div class="concept-item">
+          <div class="ci-icon">🎭</div>
+          <div class="ci-title">Papéis separados</div>
+          <div class="ci-desc">Criador, Crítico e Realizador não se misturam — cada um tem seu momento</div>
+        </div>
+        <div class="concept-item">
+          <div class="ci-icon">⚡</div>
+          <div class="ci-title">Acesso limpo</div>
+          <div class="ci-desc">No espaço 1, o crítico não pode entrar e matar as ideias antes de nascerem</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--bg-card);border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,0.06);">
+      <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;">O erro mais comum</div>
+      <p style="font-size:14px;line-height:1.7;color:var(--text-dim);">Misturar o <strong style="color:var(--text)">Crítico com a Criatividade</strong>. Quando você pensa uma ideia e já pensa "mas isso não vai funcionar", o espaço 2 invadiu o espaço 1. A técnica existe exatamente para separar esses dois momentos no tempo e no espaço.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- PANEL 4: FULL FLOW -->
+<div class="panel" id="p4">
+  <div class="flow-map">
+
+    <div style="font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:20px;">Fluxo completo da atividade em dupla</div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">👋</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Início</div>
+        <h3>Forme uma dupla — alguém top!</h3>
+        <p>Escolha alguém que energize você. Uma atividade boa com uma pessoa errada vira uma atividade ruim.</p>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">🎯</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Passo 0</div>
+        <h3>Defina objetivo e espaços</h3>
+        <p>Qual é o objetivo? Onde são os 3 espaços físicos? Demarca antes de começar.</p>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">💡</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Espaço 1</div>
+        <h3>Criatividade — sem julgamento</h3>
+        <p>Entra no espaço 1. Deixa fluir. Mínimo 5 ideias. Quando atingir, dá o sinal com a cabeça.</p>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">🔍</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Espaço 2</div>
+        <h3>Crítico — filtra sem paralisar</h3>
+        <p>Muda para o espaço 2. Analisa as ideias: o que faz sentido? O que precisa de ajuste?</p>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">🗺️</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Espaço 3</div>
+        <h3>O Como — como e quando?</h3>
+        <p>Muda para o espaço 3. Transforma em plano: como? quando? por onde começa?</p>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">📝</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Pausa</div>
+        <h3>Plano de ação — anota agora</h3>
+        <p>Para tudo. Papel e caneta. Anota pelo menos 3 ações concretas com prazo.</p>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">🎬</div>
+        <div class="flow-connector"></div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Espaço 4</div>
+        <h3>Ponte ao Futuro — o filme</h3>
+        <p>Fecha os olhos. Tela de cinema. Se vê fazendo, concluindo, celebrando. A trilha neural é instalada.</p>
+      </div>
+    </div>
+
+    <div class="flow-item">
+      <div class="flow-line-wrap">
+        <div class="flow-dot">🔄</div>
+      </div>
+      <div class="flow-content">
+        <div class="fc-tag">Troca</div>
+        <h3>Inverte os papéis</h3>
+        <p>Quem era guia vira participante. Mesmo processo. ~10-12 min cada.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.panel).classList.add('active');
+      window.scrollTo(0, 0);
+    });
+  });
+
+  function toggleStep(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
